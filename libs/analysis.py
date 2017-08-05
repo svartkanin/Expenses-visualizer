@@ -96,7 +96,6 @@ class Analysis:
 		self.reset_plots()    # close all open figures to avoid unnecessary memory usage
 		self._data_handler = data_handler
 		self._category_table_callback = category_table_cb
-		self.date_time_interval = 10    # 10 days
 		plt.style.use('ggplot')
 
 		self._day_balance_cursor = None
@@ -329,7 +328,7 @@ class Analysis:
 
 		max_val, increase = self._get_increase_value(y, picky=True)
 		ax.set_yticks(np.arange(0, max_val, increase))
-		ax.xaxis.set_major_locator(mdates.DayLocator(interval=self.date_time_interval))
+		ax.xaxis.set_major_locator(mdates.DayLocator(interval=self._data_handler.get_day_interval()))
 		ax.xaxis.set_major_formatter(mdates.DateFormatter(date_format))  # formatting of the ticks
 
 		fig.autofmt_xdate()

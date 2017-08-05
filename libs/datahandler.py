@@ -396,3 +396,20 @@ class DataHandler:
 		"""
 		df = pd.DataFrame(columns=[self._settings.column_date, self._settings.column_description, self._settings.column_amount]).reset_index()
 		return df
+
+	def get_day_interval(self):
+		"""
+			Calculate the days interval on the x-axis to be displayed
+		"""
+		df = self._data_container.sort_values(by=self._settings.column_date, ascending=False).reset_index()
+		df = df[[self._settings.column_date]]
+		ranges = df.iloc[[0, -1]]
+		if len(ranges) == 2:
+			end = ranges.iloc[0][self._settings.column_date]
+			start = ranges.iloc[1][self._settings.column_date]
+			diff = (end-start).days
+			if diff > 20:
+				return int(diff/20)
+			else:
+				return diff
+		return 1
