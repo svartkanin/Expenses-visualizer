@@ -42,7 +42,7 @@
           <x>0</x>
           <y>0</y>
           <width>901</width>
-          <height>691</height>
+          <height>681</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -218,7 +218,7 @@
                <x>10</x>
                <y>10</y>
                <width>291</width>
-               <height>621</height>
+               <height>441</height>
               </rect>
              </property>
              <property name="selectionMode">
@@ -228,7 +228,7 @@
               <enum>QAbstractItemView::SelectRows</enum>
              </property>
              <property name="sortingEnabled">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
             </widget>
             <widget class="QTableWidget" name="sett_categories_tab">
@@ -237,11 +237,24 @@
                <x>310</x>
                <y>10</y>
                <width>581</width>
-               <height>621</height>
+               <height>441</height>
               </rect>
              </property>
              <property name="sortingEnabled">
-              <bool>true</bool>
+              <bool>false</bool>
+             </property>
+            </widget>
+            <widget class="QTableWidget" name="sett_categories_unknown_tab">
+             <property name="geometry">
+              <rect>
+               <x>20</x>
+               <y>460</y>
+               <width>861</width>
+               <height>171</height>
+              </rect>
+             </property>
+             <property name="editTriggers">
+              <set>QAbstractItemView::NoEditTriggers</set>
              </property>
             </widget>
            </widget>

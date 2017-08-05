@@ -93,7 +93,7 @@ class FollowDotCursor(object):
 class Analysis:
 
 	def __init__(self, data_handler, group_table_cb):
-		plt.close("all")    # close all open figures to avoid unnecessary memory usage
+		self.reset_plots()    # close all open figures to avoid unnecessary memory usage
 		self._data_handler = data_handler
 		self._group_table_callback = group_table_cb
 		self.date_time_interval = 10    # 10 days
@@ -103,6 +103,12 @@ class Analysis:
 		self._day_overview_cursor = None
 		self._expense_color = 'mediumseagreen'
 		self._income_color = 'orangered'
+
+	def reset_plots(self):
+		"""
+			Delete all plots for redrawing
+		"""
+		plt.close("all")
 
 	def _create_groups(self, data):
 		groups = [[]] * len(data.keys())
@@ -171,8 +177,8 @@ class Analysis:
 		"""
 		# the legend labels for each single bar
 		bar_legend_labels_date = list(data.keys())
-		category_aliases = self._data_handler.get_category_aliases()
-		# the x locations for the category
+		category_aliases = self._data_handler.get_category_aliases(empty=False)
+		# the x locations for tshe category
 		x_location_categories = np.arange(1)
 		bar_width = 0.05
 

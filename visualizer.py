@@ -108,6 +108,7 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 			Clear existing views of all their widgets
 			needed in case the import is performed multiple times
 		"""
+		self._analysis.reset_plots()
 		self._clear_layout(self.overview_graph_hbox)
 		self._clear_layout(self.month_graph_hbox)
 		self._clear_layout(self.day_expenses_vbox)
@@ -167,8 +168,9 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 					item.setText(old_value)
 				elif new_value != old_value:
 					self._data_handler.update_entries(cur_alias, cur_categ, 'update', new_value)
-
 				self._sett_cat_table_dc = None
+
+			self._update_category_changes()
 
 	def _cb_sett_categories_double_click(self, table):
 		"""
@@ -233,12 +235,16 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 			Setup category defintions tables
 		"""
 		# initialize the alias table with existing aliases from the definitions file
-		aliases = self._data_handler.get_category_aliases()
+		aliases = self._data_handler.get_category_aliases(incl_unknown=False)
 		self._setup_setting_tables(self.sett_category_aliases_tab, aliases, ['Aliases'])
 		self.sett_category_aliases_tab.itemSelectionChanged.connect(self._cb_alias_changed)
 
 		# setup the categories table of the aliases
 		self._setup_setting_tables(self.sett_categories_tab, [], ['Categories'])
+
+		# setup the unknown categories table
+		unknown = self._data_handler.get_unknown_categories()
+		self._setup_setting_tables(self.sett_categories_unknown_tab, unknown, ['Unknown'])
 
 		# Auto select the first row
 		self.sett_category_aliases_tab.selectRow(0)
@@ -277,6 +283,19 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 			elif table == self.sett_categories_tab:
 				self._data_handler.update_entries(self.sett_category_aliases_tab.currentItem().text(), self._get_cell_val(entry, table), 'delete')
 			table.removeRow(table.rowAt(entry.y()))
+			self._update_category_changes()
+
+	def _update_category_changes(self):
+		"""
+			Update category changes and reload category tab
+		"""
+		unknown = self._data_handler.get_unknown_categories()
+		self._setup_setting_tables(self.sett_categories_unknown_tab, unknown, ['Unknown'])
+		# lazy way of updating category changes is to reload every tab
+		# done this way because otherwise the single graphs of the category tab would
+		# have to be remember to be deleted from the plt
+		# if they wouldn't be deleted then the are constantly added and cause high memory usage
+		self._init_all_tabs()
 
 	def _cb_table_context_menu(self, cell, table):
 		"""
@@ -292,6 +311,16 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 		menu.addAction(rem_action)
 
 		menu.popup(QCursor.pos())
+
+	def _init_all_tabs(self):
+		"""
+			Init all tabs with the corresponding data to display
+		"""
+		self._clear_all()
+		self._set_overview_tab()
+		self._set_day_overview_tab()
+		self._set_category_detail_tab()
+		self._set_search_tab()
 
 	def _cb_but_import_clicked(self):
 		"""
@@ -313,11 +342,7 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 				self._setup_category_definitions()
 				self._analysis = Analysis(self._data_handler, self.cb_category_table)
 
-				self._clear_all()
-				self._set_overview_tab()
-				self._set_day_overview_tab()
-				self._set_category_detail_tab()
-				self._set_search_tab()
+				self._init_all_tabs()
 
 				self._imported = True
 				self._enable_disable_tabs()

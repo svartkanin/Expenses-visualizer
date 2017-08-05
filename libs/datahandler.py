@@ -13,6 +13,8 @@ setlocale(LC_NUMERIC, '')
 class DataHandler:
 
 	def __init__(self, sett):
+		self._categories_container = None
+		self._data_container = None
 		self._settings = sett
 		self._definitions_data = self._get_category_def()
 
@@ -26,25 +28,32 @@ class DataHandler:
 			Retrieve category definitions
 		"""
 		self._definitions_path = self._settings.import_dir + os.sep + self._settings.category_def_dir
+		data = OrderedDict()
 		if os.path.isfile(self._definitions_path):
 			with open(self._definitions_path, 'r') as fp:
-				return json.load(fp, object_pairs_hook=OrderedDict)
-		else:
-			return OrderedDict({'settings': {}, 'categories': {}})
+				data = json.load(fp, object_pairs_hook=OrderedDict)
+
+		# in case those fields are not present in the definitions file add them
+		data.setdefault('settings', {})
+		data.setdefault('categories', {})
+		return data
+
+	def get_unknown_categories(self):
+		return self._definitions_data['categories'].setdefault('Unknown', [])
 
 	def _check_uncategorized(self, uncategorized):
 		"""
 			Handle uncategorized entries from import data
 		"""
+		unknown = self._definitions_data['categories'].setdefault('Unknown', [])
 		if not uncategorized.empty:
 			rows = [row.strip() for row in uncategorized[[self._settings.column_description]].to_string(index=False, header=False).split('\n')]
-			unknown = set(self._definitions_data['categories'].setdefault('Unknown', []))
-			self._definitions_data['categories']['Unknown'] = list(unknown | set(rows))
-			self._write_definitions()
+			unknown.extend(rows)
+		self._write_definitions()
 
 	def _write_definitions(self):
 		"""
-			Write definitions container to file
+			Write definitions settings to file
 		"""
 		with open(self._definitions_path, 'w') as fp:
 			json.dump(self._definitions_data, fp, indent=4)
@@ -70,7 +79,13 @@ class DataHandler:
 				else:
 					self._definitions_data['categories'][entry1].append(new_value)
 
+		# save changes to file
 		self._write_definitions()
+
+		# delete unknwon categories for recalculation
+		del self._definitions_data['categories']['Unknown']
+		# recalculate the categories
+		self._categories_container = self._calculate_categories()
 
 	def save_settings(self):
 		"""
@@ -84,16 +99,16 @@ class DataHandler:
 		self._write_definitions()
 
 	def get_settings(self):
-		if 'settings' in self._definitions_data:
-			return self._definitions_data['settings']
-		else:
-			return None
+		"""
+			Retrieve settings data
+		"""
+		return self._definitions_data['settings']
 
-	def get_category_aliases(self):
+	def get_category_aliases(self, incl_unknown=True, empty=True):
 		"""
-			Retrieve all defined aliases
+			Retrieve all defined aliases that are NOT unknown
 		"""
-		return list(self._definitions_data['categories'].keys())
+		return [k for k, v in self._definitions_data['categories'].items() if (incl_unknown or k != 'Unknown') and (empty or v)]
 
 	def get_categories(self, alias):
 		"""
@@ -181,7 +196,7 @@ class DataHandler:
 		"""
 			Retrieve all data sets from dataframe that are not covered by any category
 		"""
-		regex = '|'.join(['%s' % ('|'.join(i)) for i in categories])
+		regex = '|'.join(['%s' % ('|'.join(i)) for i in categories if i])
 		if regex:
 			return df[~df[self._settings.column_description].str.contains(regex, flags=re.IGNORECASE)]
 		else:
@@ -208,12 +223,13 @@ class DataHandler:
 			category_container = OrderedDict()
 
 			for alias, categories in category_defs.items():
-				# create an OR regex for all categories for an alias
-				regex = '|'.join(['%s' % i for i in categories])
-				# apply regex to the dataframe, filtering all matching datasets for the current alias
-				df_filtered = df_exp[df_exp[self._settings.column_description].str.contains(regex, flags=re.IGNORECASE)]
-				# calculate the sum and abs for all filtered data sets to be displayed
-				category_container[alias] = abs((df_filtered[self._settings.column_amount].values.sum()))
+				if categories:
+					# create an OR regex for all categories of the current alias
+					regex = '|'.join(['%s' % i for i in categories])
+					# apply regex to the dataframe, filtering all matching datasets for the current alias
+					df_filtered = df_exp[df_exp[self._settings.column_description].str.contains(regex, flags=re.IGNORECASE)]
+					# calculate the sum and abs for all filtered data sets to be displayed
+					category_container[alias] = abs((df_filtered[self._settings.column_amount].values.sum()))
 
 			# check if any data sets have not been categorized
 			category_container.setdefault('Unknown', 0)
@@ -226,6 +242,7 @@ class DataHandler:
 			results[self._get_date_legend(date)] = category_container
 
 		self._check_uncategorized(uncategorized)
+
 		return results
 
 	def get_total_in_out(self, df=None):
@@ -291,16 +308,22 @@ class DataHandler:
 		year, month = self._get_month_from_key(selected_date)
 		col_date = self._settings.column_date
 		col_desc = self._settings.column_description
+		col_amount = self._settings.column_amount
 
 		categories = self._definitions_data['categories'][category]
 		regex = '|'.join(['%s' % i for i in categories])
 
 		# filter all data sets for year and month
 		df_filtered = self._data_container[(self._data_container[col_date].dt.year == year) & (self._data_container[col_date].dt.month == month)]
+		# filter data by regex of categories
 		df_filtered = df_filtered[df_filtered[col_desc].str.contains(regex, flags=re.IGNORECASE)]
-		df_filtered[self._settings.column_date] = df_filtered[self._settings.column_date].apply(lambda x: x.strftime(self._settings.date_format))
+		# filter only expenses
+		df_filtered = df_filtered[df_filtered[col_amount] < 0]
+		# format date column
+		df_filtered[col_date] = df_filtered[col_date].apply(lambda x: x.strftime(self._settings.date_format))
 
-		return df_filtered[[self._settings.column_date, self._settings.column_description, self._settings.column_amount]].reset_index()
+		# return only columns needed for display
+		return df_filtered[[col_date, col_desc, col_amount]].reset_index()
 
 	def _calc_balances(self, df, date, balance):
 		"""

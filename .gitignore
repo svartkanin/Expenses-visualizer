@@ -102,3 +102,4 @@ ENV/
 
 Imports/
 Backup/
+*.autosave
