@@ -564,7 +564,7 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 		table_widget.setEditTriggers(QAbstractItemView.NoEditTriggers)
 		table_widget.setSortingEnabled(True)
 
-		graph = self._wrap_widget('hbox', fig, height=300, align=Qt.AlignCenter)
+		graph = self._wrap_widget('hbox', fig, height=300)
 		table = self._wrap_widget('hbox', table_widget)
 		container = self._wrap_widget('vbox', [graph, table])
 

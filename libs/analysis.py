@@ -127,8 +127,8 @@ class Analysis:
 			if horizontal:
 				width = rect.get_width()
 				text = '%d' % int(width)
-
 				x = width + (len(text) * 800)
+
 				y = rect.get_y() + rect.get_height() / 2. + 0.125
 				ax.text(x, y, text, ha='center', va='bottom')
 			else:
@@ -223,7 +223,7 @@ class Analysis:
 			box = ax.get_position()
 			ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
 			# put a legend to the right of the current axis
-			ax.legend(([x[0] for x in category_blocks]), bar_legend_labels_date, fontsize='small', bbox_to_anchor=(1.4, 1))
+			ax.legend(([x[0] for x in category_blocks]), bar_legend_labels_date, fontsize='small', bbox_to_anchor=(1.4, 1), ncol=2)
 
 			# put the actual numbers on top of the charts
 			for rec in category_blocks:
@@ -262,13 +262,15 @@ class Analysis:
 		indexes = indexes + 0.25
 		ax.set_yticks(indexes)
 		# set y-axis label values
-		ax.set_yticklabels(labels, fontsize=15)
+		ax.set_yticklabels(labels, fontsize=12)
 		# labels read top-to-bottom
 		ax.invert_yaxis()
-		# set x-axis values and range
+		# set title of figure
+		ax.set_title('Total overview', fontweight='bold', fontsize=15)
 
-		max_val, increase = self._get_increase_value([expenses, income])
-		ax.set_xticks(np.arange(0, max_val, increase))
+		# set x-axis values and range
+		# max_val, increase = self._get_increase_value([expenses, income])
+		# ax.set_xticks(np.arange(0, max_val, increase))
 
 		self._autolabel(barlist, ax, horizontal=True)
 
@@ -301,12 +303,21 @@ class Analysis:
 		# set location of x labels
 		ax.set_xticks(x_label_months + bar_width)
 		# set values of x labels
-		ax.set_xticklabels((data.keys()))
+
+		labels = []
+		for k in data.keys():
+			k = k.replace(':', '\n')
+			labels.append(k)
+
+		# ax.set_xticklabels(labels)
+		ax.set_xticklabels(data.keys(), rotation=30, ha='right')
 
 		# calculate the max value and interval of the y-axis values
 		max_val, increase = self._get_increase_value([max(categories[0]), max(categories[1])])
 		# set the y-axis values
 		ax.set_yticks(np.arange(0, max_val, increase))
+		# set title of figure
+		ax.set_title('Month overview', fontweight='bold', fontsize=15)
 
 		# specify the legend for the single bars
 		bar_labels = ["Expense", "Income"]
@@ -316,7 +327,10 @@ class Analysis:
 		for rec in bar_categories:
 			self._autolabel(rec, ax)
 
-	def _day_chart_creator(self, fig, data, date_format):
+		# needed otherwise x-labels get cut off
+		fig.tight_layout()
+
+	def _day_chart_creator(self, fig, data, date_format, title):
 		"""
 			Line chart creator for the day figures
 		"""
@@ -332,6 +346,8 @@ class Analysis:
 		ax.set_yticks(np.arange(0, max_val, increase))
 		ax.xaxis.set_major_locator(mdates.DayLocator(interval=self._data_handler.get_day_interval()))
 		ax.xaxis.set_major_formatter(mdates.DateFormatter(date_format))  # formatting of the ticks
+
+		ax.set_title(title, fontweight='bold', fontsize=15)
 
 		fig.autofmt_xdate()
 		canvas = FigureCanvas(fig)
@@ -354,7 +370,7 @@ class Analysis:
 		"""
 			Create overall overview figure
 		"""
-		fig = plt.figure()
+		fig = plt.figure(figsize=(1, 3))
 		self._create_overall_bar_chart(fig)
 		canvas = FigureCanvas(fig)
 		return canvas
@@ -388,7 +404,7 @@ class Analysis:
 		"""
 		fig = plt.figure()
 		data, date_format = self._data_handler.get_total_day()
-		canvas, cursor = self._day_chart_creator(fig, data, date_format)
+		canvas, cursor = self._day_chart_creator(fig, data, date_format, 'Day overview')
 		self._day_overview_cursor = cursor
 		return canvas
 
@@ -398,6 +414,6 @@ class Analysis:
 		"""
 		fig = plt.figure()
 		data, date_format = self._data_handler.get_days_balance()
-		canvas, cursor = self._day_chart_creator(fig, data, date_format)
+		canvas, cursor = self._day_chart_creator(fig, data, date_format, 'Balance overview')
 		self._day_balance_cursor = cursor
 		return canvas

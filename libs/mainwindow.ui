@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>930</width>
+    <width>1100</width>
     <height>776</height>
    </rect>
   </property>
@@ -30,7 +30,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="settings_tab">
        <attribute name="title">
@@ -41,7 +41,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>901</width>
+          <width>1081</width>
           <height>681</height>
          </rect>
         </property>
@@ -60,7 +60,7 @@
               <rect>
                <x>10</x>
                <y>10</y>
-               <width>861</width>
+               <width>1041</width>
                <height>101</height>
               </rect>
              </property>
@@ -89,7 +89,7 @@
               <item row="1" column="1">
                <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0">
                 <property name="rightMargin">
-                 <number>600</number>
+                 <number>700</number>
                 </property>
                 <item>
                  <widget class="QComboBox" name="cb_file_type">
@@ -129,7 +129,7 @@
             <widget class="QPushButton" name="but_import">
              <property name="geometry">
               <rect>
-               <x>760</x>
+               <x>920</x>
                <y>590</y>
                <width>111</width>
                <height>29</height>
@@ -144,7 +144,7 @@
               <rect>
                <x>240</x>
                <y>130</y>
-               <width>631</width>
+               <width>811</width>
                <height>261</height>
               </rect>
              </property>
@@ -217,7 +217,7 @@
               <rect>
                <x>10</x>
                <y>10</y>
-               <width>291</width>
+               <width>351</width>
                <height>441</height>
               </rect>
              </property>
@@ -234,9 +234,9 @@
             <widget class="QTableWidget" name="sett_categories_tab">
              <property name="geometry">
               <rect>
-               <x>310</x>
+               <x>370</x>
                <y>10</y>
-               <width>581</width>
+               <width>691</width>
                <height>441</height>
               </rect>
              </property>
@@ -247,9 +247,9 @@
             <widget class="QTableWidget" name="sett_categories_unknown_tab">
              <property name="geometry">
               <rect>
-               <x>20</x>
+               <x>10</x>
                <y>460</y>
-               <width>861</width>
+               <width>1051</width>
                <height>171</height>
               </rect>
              </property>
@@ -280,36 +280,6 @@
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="overview_title_hbox">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
-            </property>
-            <item>
-             <widget class="QLabel" name="overview_label">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>15</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>Total overview</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
            <layout class="QHBoxLayout" name="overview_graph_hbox">
             <property name="sizeConstraint">
              <enum>QLayout::SetDefaultConstraint</enum>
@@ -317,39 +287,9 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="overview_month_label_hbox">
+           <layout class="QHBoxLayout" name="month_graph_hbox" stretch="">
             <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
-            </property>
-            <item>
-             <widget class="QLabel" name="label_2">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="font">
-               <font>
-                <pointsize>15</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>Per month</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="month_graph_hbox">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetDefaultConstraint</enum>
+             <enum>QLayout::SetNoConstraint</enum>
             </property>
            </layout>
           </item>
@@ -366,8 +306,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>901</width>
-          <height>681</height>
+          <width>1071</width>
+          <height>691</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -391,11 +331,7 @@
             </attribute>
             <layout class="QHBoxLayout" name="horizontalLayout_2">
              <item>
-              <layout class="QVBoxLayout" name="day_expenses_vbox">
-               <property name="sizeConstraint">
-                <enum>QLayout::SetDefaultConstraint</enum>
-               </property>
-              </layout>
+              <layout class="QVBoxLayout" name="day_expenses_vbox"/>
              </item>
             </layout>
            </widget>
@@ -423,7 +359,7 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>881</width>
+          <width>1071</width>
           <height>691</height>
          </rect>
         </property>
@@ -473,7 +409,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>930</width>
+     <width>1100</width>
      <height>23</height>
     </rect>
    </property>
