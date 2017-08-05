@@ -266,7 +266,9 @@ class Analysis:
 		# labels read top-to-bottom
 		ax.invert_yaxis()
 		# set x-axis values and range
-		ax.set_xticks(np.arange(0, max(expenses, income) + 30000, 10000))
+
+		max_val, increase = self._get_increase_value([expenses, income])
+		ax.set_xticks(np.arange(0, max_val, increase))
 
 		self._autolabel(barlist, ax, horizontal=True)
 
