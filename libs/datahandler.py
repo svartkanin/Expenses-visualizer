@@ -14,8 +14,11 @@ class DataHandler:
 
 	def __init__(self, sett):
 		self._settings = sett
-		self._data_container = self._import_files()
 		self._definitions_data = self._get_category_def()
+
+	def import_data(self, sett):
+		self._settings = sett
+		self._data_container = self._import_files()
 		self._categories_container = self._calculate_categories()
 
 	def _get_category_def(self):
@@ -27,7 +30,7 @@ class DataHandler:
 			with open(self._definitions_path, 'r') as fp:
 				return json.load(fp, object_pairs_hook=OrderedDict)
 		else:
-			return OrderedDict({'categories': {}})
+			return OrderedDict({'settings': {}, 'categories': {}})
 
 	def _check_uncategorized(self, uncategorized):
 		"""
@@ -68,6 +71,23 @@ class DataHandler:
 					self._definitions_data['categories'][entry1].append(new_value)
 
 		self._write_definitions()
+
+	def save_settings(self):
+		"""
+			On successful import the current settings are saved to the definitions file as well
+			Reopening the same import directory will therefore not require to set the same settings
+			over and over again
+		"""
+		self._definitions_data['settings'] = OrderedDict({'file_type': self._settings.file_type,
+		                                                  'date_format': self._settings.date_format,
+		                                                  'columns': self._settings.col_numbers})
+		self._write_definitions()
+
+	def get_settings(self):
+		if 'settings' in self._definitions_data:
+			return self._definitions_data['settings']
+		else:
+			return None
 
 	def get_category_aliases(self):
 		"""

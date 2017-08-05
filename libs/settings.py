@@ -9,6 +9,7 @@ class Settings:
 		self.available_extensions = ['csv']
 		self.available_date_formats = ['%Y-%m-%d', '%d-%m-%Y', '%m-%d-%Y', '%Y-%d-%m']
 		self.header = []
+		self.col_numbers = None
 		self.has_header = False
 		self.delimiter = None
 		self.file_type = None
@@ -66,6 +67,12 @@ class Settings:
 		else:
 			self._set_default_col_names()
 			self.header = self._create_custom_header(settings)
+
+		# remember the chosen columns to store them in the settings file
+		self.col_numbers = {'date': str(settings['date_col']+1),
+		                    'description': str(settings['description_col']+1),
+		                    'amount': str(settings['amount_col']+1),
+		                    'balance': str(settings['balance_col']+1)}
 
 	def _set_default_col_names(self):
 		"""

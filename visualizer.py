@@ -309,7 +309,7 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 
 			try:
 				self._settings.set_import_settings(imp_settings)
-				self._data_handler = DataHandler(self._settings)
+				self._data_handler.import_data(self._settings)
 				self._setup_category_definitions()
 				self._analysis = Analysis(self._data_handler, self.cb_category_table)
 
@@ -321,6 +321,7 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 
 				self._imported = True
 				self._enable_disable_tabs()
+				self._data_handler.save_settings()
 			except ImportError as e:
 				self._show_msg_box('critical', e.args[0])
 			except (ValueError, AttributeError):
@@ -351,6 +352,19 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 			self.amount_col.addItems(selections)
 			self.balance_col.addItems(selections)
 
+	def _set_settings(self, sett):
+		"""
+			Set saved settings
+		"""
+		if 'file_type' in sett: self.cb_file_type.setCurrentText(sett['file_type'])
+		if 'date_format' in sett: self.cb_date_format.setCurrentText(sett['date_format'])
+		if 'columns' in sett:
+			columns = sett['columns']
+			if 'date' in columns: self.date_col.setCurrentText(columns['date'])
+			if 'description' in columns: self.description_col.setCurrentText(columns['description'])
+			if 'amount' in columns: self.amount_col.setCurrentText(columns['amount'])
+			if 'balance' in columns: self.balance_col.setCurrentText(columns['balance'])
+
 	def _cb_import_dir(self):
 		"""
 			Callback function for the selection of the import directory
@@ -360,6 +374,12 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 			self.import_dir.setText(self._import_dir)
 			self.cb_file_type.setCurrentText(self._cb_selection_text)
 			self._cb_enable_disable_controls()
+
+			self._settings.import_dir = self._import_dir
+			self._data_handler = DataHandler(self._settings)
+			loaded_settings = self._data_handler.get_settings()
+			if loaded_settings:
+				self._set_settings(loaded_settings)
 
 	def _cb_date_format(self):
 		"""
