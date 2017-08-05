@@ -92,10 +92,10 @@ class FollowDotCursor(object):
 
 class Analysis:
 
-	def __init__(self, data_handler, group_table_cb):
+	def __init__(self, data_handler, category_table_cb):
 		self.reset_plots()    # close all open figures to avoid unnecessary memory usage
 		self._data_handler = data_handler
-		self._group_table_callback = group_table_cb
+		self._category_table_callback = category_table_cb
 		self.date_time_interval = 10    # 10 days
 		plt.style.use('ggplot')
 
@@ -110,15 +110,15 @@ class Analysis:
 		"""
 		plt.close("all")
 
-	def _create_groups(self, data):
-		groups = [[]] * len(data.keys())
-		group_counter = 0
+	def _create_categories(self, data):
+		categories = [[]] * len(data.keys())
+		counter = 0
 
 		for values in data.values():
-			groups[group_counter] = list(values.values())
-			group_counter += 1
+			categories[counter] = list(values.values())
+			counter += 1
 
-		return groups
+		return categories
 
 	def _autolabel(self, rects, ax, horizontal=False):
 		"""
@@ -182,8 +182,8 @@ class Analysis:
 		x_location_categories = np.arange(1)
 		bar_width = 0.05
 
-		# categorize the data and build the groups to be displayed
-		categorized_groups = self._create_groups(data)
+		# categorize the data and build the category blocks to be displayed
+		categorized_data = self._create_categories(data)
 		# get the color spectrum for the single bars
 		colors = self._get_colors(len(bar_legend_labels_date))
 
@@ -194,19 +194,19 @@ class Analysis:
 			fig = plt.figure()
 			ax = fig.add_subplot(111)
 
-			group_blocks = []
+			category_blocks = []
 			x_location = 0
 			displayed_values = []
-			for i in range(len(categorized_groups)):
-				if categorized_groups[i]:
-					val = categorized_groups[i][j]
+			for i in range(len(categorized_data)):
+				if categorized_data[i]:
+					val = categorized_data[i][j]
 					rect = ax.bar(x_location_categories + x_location, [val], bar_width, color=colors[i], picker=5)
-					group_blocks.append(rect)
+					category_blocks.append(rect)
 					x_location += bar_width
 					displayed_values.append(val)
 
 			single_block = OrderedDict()
-			for bar, l in zip(group_blocks, bar_legend_labels_date):
+			for bar, l in zip(category_blocks, bar_legend_labels_date):
 				single_block[bar] = l
 
 			# remember the generated bar charts to be able to handle a
@@ -224,10 +224,10 @@ class Analysis:
 			box = ax.get_position()
 			ax.set_position([box.x0, box.y0, box.width*0.8, box.height])
 			# put a legend to the right of the current axis
-			ax.legend(([x[0] for x in group_blocks]), bar_legend_labels_date, fontsize='small', bbox_to_anchor=(1.4, 1))
+			ax.legend(([x[0] for x in category_blocks]), bar_legend_labels_date, fontsize='small', bbox_to_anchor=(1.4, 1))
 
 			# put the actual numbers on top of the charts
-			for rec in group_blocks:
+			for rec in category_blocks:
 				self._autolabel(rec, ax)
 
 			figures[category_aliases[j]] = fig
@@ -283,18 +283,18 @@ class Analysis:
 			income.append(values[0])
 			expenses.append(values[1])
 
-		groups = [expenses, income]
+		categories = [expenses, income]
 		x_label_months = np.arange(len(data.keys()))
 		bar_width = 0.35
 		colors = [self._income_color, self._expense_color]
 
 		ax = fig.add_subplot(111)
 
-		bar_groups = []
+		bar_categories = []
 		x_location = 0
-		for i in range(len(groups)):
-			rect = ax.bar(x_label_months + x_location, groups[i], bar_width, color=colors[i], picker=10)
-			bar_groups.append(rect)
+		for i in range(len(categories)):
+			rect = ax.bar(x_label_months + x_location, categories[i], bar_width, color=colors[i], picker=10)
+			bar_categories.append(rect)
 			x_location += bar_width
 
 		# set location of x labels
@@ -303,16 +303,16 @@ class Analysis:
 		ax.set_xticklabels((data.keys()))
 
 		# calculate the max value and interval of the y-axis values
-		max_val, increase = self._get_increase_value([max(groups[0]), max(groups[1])])
+		max_val, increase = self._get_increase_value([max(categories[0]), max(categories[1])])
 		# set the y-axis values
 		ax.set_yticks(np.arange(0, max_val, increase))
 
 		# specify the legend for the single bars
 		bar_labels = ["Expense", "Income"]
-		ax.legend(([x[0] for x in bar_groups]), bar_labels, fontsize='small')
+		ax.legend(([x[0] for x in bar_categories]), bar_labels, fontsize='small')
 
 		# put the actual numbers on top of the bars
-		for rec in bar_groups:
+		for rec in bar_categories:
 			self._autolabel(rec, ax)
 
 	def _day_chart_creator(self, fig, data, date_format):
@@ -342,12 +342,12 @@ class Analysis:
 			Callback function for handling single bar chart selections
 		"""
 		rect = event.artist
-		for category, single_group in self._categorized_barlist.items():
-			for bars, date in single_group.items():
+		for category, single_category in self._categorized_barlist.items():
+			for bars, date in single_category.items():
 				for bar in bars:
 					if rect == bar:
 						df = self._data_handler.get_categorized_data_sets(date, category)
-						self._group_table_callback(df, category)
+						self._category_table_callback(df, category)
 
 	def create_overall_overview(self):
 		"""
