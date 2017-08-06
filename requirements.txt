@@ -1,0 +1,6 @@
+xlrd==0.9.4
+numpy==1.11.0
+pandas==0.17.1
+matplotlib==1.5.1
+PyQt5==5.9
+scipy==0.19.1
