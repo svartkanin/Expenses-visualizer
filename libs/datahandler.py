@@ -123,18 +123,25 @@ class DataHandler:
 		"""
 			Callback function for csv read to get the possible float from a string
 		"""
-		if isinstance(value, type('')):
-			if '.' in value and ',' in value:
-				pos1 = value.find('.')
-				pos2 = value.find(',')
-				if pos1 > pos2:
-					value = value.replace(',', '', 1)
-				else:
-					value = value.replace('.', '', 1)
-			return atof(value)
-		elif type(value) in [int, float]:
-			return value
-		raise ValueError('Unknown type: ' + type(value).__name__ + ' for value: ' + repr(value))
+		if value:
+			if isinstance(value, type('')):
+				try:
+					if '.' in value and ',' in value:
+						pos1 = value.find('.')
+						pos2 = value.find(',')
+						if pos1 > pos2:
+							value = value.replace(',', '', 1)
+						else:
+							value = value.replace('.', '', 1)
+					return atof(value)
+				except:
+					raise ValueError('Could not convert value to flaot: ' + value)
+			elif type(value) in [int, float]:
+				return value
+			else:
+				raise ValueError('Unknown type: ' + type(value).__name__ + ' for value: ' + repr(value))
+		else:
+			return None
 
 	def _cb_date_parser(self, x):
 		"""
