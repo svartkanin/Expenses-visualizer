@@ -43,7 +43,6 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 		self._categories_table_container = dict()
 		self._imported = False
 		self._sett_cat_table_dc = None
-		self._cb_selection_text = 'Select'
 
 		# SETTINGS
 		self._settings = Settings()
@@ -66,12 +65,12 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 		self.but_import_dir.clicked.connect(self._cb_import_dir)
 
 		# FILE TYPE
-		file_types = [self._cb_selection_text] + self._settings.available_extensions
+		file_types = [self._settings.selection_text] + self._settings.available_extensions
 		self.cb_file_type.addItems(file_types)
 		self.cb_file_type.currentIndexChanged.connect(self._cb_file_type)
 
 		# DATE FORMAT
-		date_types = [self._cb_selection_text] + self._settings.available_date_formats
+		date_types = [self._settings.selection_text] + self._settings.available_date_formats
 		self.cb_date_format.addItems(date_types)
 		self.cb_date_format.currentIndexChanged.connect(self._cb_date_format)
 
@@ -333,8 +332,13 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 			                'date_format': self.cb_date_format.currentText(),
 			                'date_col': int(self.date_col.currentText())-1,
 			                'description_col': int(self.description_col.currentText())-1,
-			                'amount_col': int(self.amount_col.currentText())-1,
-			                'balance_col': int(self.balance_col.currentText())-1}
+			                'amount_col': int(self.amount_col.currentText())-1}
+
+			# balance is not a required field
+			if self.balance_col.currentText() != self._settings.selection_text:
+				imp_settings['balance_col'] = int(self.balance_col.currentText())-1
+			else:
+				imp_settings['balance_col'] = self.balance_col.currentText()
 
 			try:
 				self._settings.set_import_settings(imp_settings)
@@ -368,7 +372,7 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 			Init some settings with default parameters
 		"""
 		if preview_data:
-			selections = [self._cb_selection_text]
+			selections = [self._settings.selection_text]
 			selections.extend([str(i) for i in range(1, len(preview_data[0])+1)])
 
 			self._set_table_entries(self.data_preview_tab, preview_data)
@@ -397,7 +401,7 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 		self._import_dir = QFileDialog.getExistingDirectory(self, "Select import directory")
 		if self._import_dir:
 			self.import_dir.setText(self._import_dir)
-			self.cb_file_type.setCurrentText(self._cb_selection_text)
+			self.cb_file_type.setCurrentText(self._settings.selection_text)
 			self._cb_enable_disable_controls()
 
 			self._settings.import_dir = self._import_dir
@@ -411,7 +415,7 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 			Callback function for the date format selection combobox
 			this will simply trigger the display of the example value
 		"""
-		if self.cb_date_format.currentText() != self._cb_selection_text:
+		if self.cb_date_format.currentText() != self._settings.selection_text:
 			text = datetime.datetime.strptime('1980-11-23', '%Y-%m-%d').strftime(self.cb_date_format.currentText())
 			self.date_format.setText(text)
 		else:
@@ -422,7 +426,7 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 		"""
 			Callback function for file type selection
 		"""
-		if self.cb_file_type.currentText() != self._cb_selection_text:
+		if self.cb_file_type.currentText() != self._settings.selection_text:
 			preview_data = self._settings.sniff_import_dir(self._import_dir, self.cb_file_type.currentText())
 			self._init_defaults(preview_data)
 		else:
@@ -434,10 +438,9 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 		"""
 			Checks if all column specifications of the import data have been set
 		"""
-		if self.date_col.currentText() != self._cb_selection_text and \
-				self.description_col.currentText() != self._cb_selection_text and \
-				self.amount_col.currentText() != self._cb_selection_text and \
-				self.balance_col.currentText() != self._cb_selection_text:
+		if self.date_col.currentText() != self._settings.selection_text and \
+				self.description_col.currentText() != self._settings.selection_text and \
+				self.amount_col.currentText() != self._settings.selection_text:
 			return True
 		else:
 			return False
@@ -464,23 +467,23 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 		# Disable controls if no import directory is specified yet
 		enable = True if self.import_dir.text() else False
 		self.cb_file_type.setEnabled(enable)
-		if not enable: self.cb_file_type.setCurrentText(self._cb_selection_text)
+		if not enable: self.cb_file_type.setCurrentText(self._settings.selection_text)
 
 		# Disable control if no file type has been specified yet
 		if self.cb_file_type.currentText() in self._settings.available_extensions:
-			enable = self.cb_file_type.currentText() != self._cb_selection_text
+			enable = self.cb_file_type.currentText() != self._settings.selection_text
 		else:
 			enable = False
 
 		self.cb_date_format.setEnabled(enable)
 		# self._enable_disable_rb(enable)
 		self._enable_disable_col_def(enable)
-		if not enable: self.cb_date_format.setCurrentText(self._cb_selection_text)
+		if not enable: self.cb_date_format.setCurrentText(self._settings.selection_text)
 
 		# Disable import button if not all required fields are set
 		enable = True if (self.import_dir.text() and
-		                 self.cb_file_type.currentText() != self._cb_selection_text and
-		                 self.cb_date_format.currentText() != self._cb_selection_text and
+		                 self.cb_file_type.currentText() != self._settings.selection_text and
+		                 self.cb_date_format.currentText() != self._settings.selection_text and
 		                 self._check_column_defs()) else False
 		self.but_import.setEnabled(enable)
 
@@ -512,7 +515,13 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 			Setup day overview tab
 		"""
 		self.day_expenses_vbox.addWidget(self._analysis.create_day_overview())
-		self.balance_vbox.addWidget(self._analysis.create_day_balance())
+		# in case no balance column has been chosen also no balances can be calculated
+		# therefore just disable the entire balance tab
+		if self._settings.column_balance:
+			self.days_main_tab.setTabEnabled(1, True)
+			self.balance_vbox.addWidget(self._analysis.create_day_balance())
+		else:
+			self.days_main_tab.setTabEnabled(1, False)
 
 	def _wrap_widget(self, t_type, widget, width=0, height=0, margins=None, align=None):
 		"""

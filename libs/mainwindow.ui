@@ -30,7 +30,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="settings_tab">
        <attribute name="title">
@@ -312,7 +312,7 @@
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
-          <widget class="QTabWidget" name="tabWidget">
+          <widget class="QTabWidget" name="days_main_tab">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>

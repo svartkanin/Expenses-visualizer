@@ -6,6 +6,7 @@ from xlrd import open_workbook  # pandas uses xlrd internally as well so just st
 class Settings:
 
 	def __init__(self):
+		self.selection_text = 'Select'
 		self.category_def_dir = 'category_definitions.json'
 		self.available_extensions = ['csv', 'xls']
 		self.available_date_formats = ['%Y-%m-%d', '%y-%m-%d', '%d-%m-%Y', '%m-%d-%Y', '%Y-%d-%m']
@@ -64,7 +65,8 @@ class Settings:
 			self.column_date = self.header[settings['date_col']]
 			self.column_description = self.header[settings['description_col']]
 			self.column_amount = self.header[settings['amount_col']]
-			self.column_balance = self.header[settings['balance_col']]
+			if settings['balance_col'] != self.selection_text:
+				self.column_balance = self.header[settings['balance_col']]
 		else:
 			self._set_default_col_names()
 			self.header = self._create_custom_header(settings)
@@ -72,8 +74,11 @@ class Settings:
 		# remember the chosen columns to store them in the settings file
 		self.col_numbers = {'date': str(settings['date_col']+1),
 		                    'description': str(settings['description_col']+1),
-		                    'amount': str(settings['amount_col']+1),
-		                    'balance': str(settings['balance_col']+1)}
+		                    'amount': str(settings['amount_col']+1)}
+		if settings['balance_col'] != self.selection_text:
+			self.col_numbers['balance'] = str(settings['balance_col']+1)
+		else:
+			self.col_numbers['balance'] = self.selection_text
 
 	def _set_default_col_names(self):
 		"""
