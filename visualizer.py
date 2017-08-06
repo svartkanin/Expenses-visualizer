@@ -341,12 +341,12 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 				self._data_handler.import_data(self._settings)
 				self._setup_category_definitions()
 				self._analysis = Analysis(self._data_handler, self.cb_category_table)
+				self._data_handler.save_settings()
 
 				self._init_all_tabs()
 
 				self._imported = True
 				self._enable_disable_tabs()
-				self._data_handler.save_settings()
 			except ImportError as e:
 				self._show_msg_box('critical', e.args[0])
 			except (ValueError, AttributeError):
@@ -412,7 +412,7 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 			this will simply trigger the display of the example value
 		"""
 		if self.cb_date_format.currentText() != self._cb_selection_text:
-			text = datetime.datetime.strptime('1920-11-23', '%Y-%m-%d').strftime(self.cb_date_format.currentText())
+			text = datetime.datetime.strptime('1980-11-23', '%Y-%m-%d').strftime(self.cb_date_format.currentText())
 			self.date_format.setText(text)
 		else:
 			self.date_format.setText('')
@@ -467,7 +467,7 @@ class Visualizer(QMainWindow, Ui_MainWindow):
 		if not enable: self.cb_file_type.setCurrentText(self._cb_selection_text)
 
 		# Disable control if no file type has been specified yet
-		if self.cb_file_type.currentText() == 'csv':
+		if self.cb_file_type.currentText() in self._settings.available_extensions:
 			enable = self.cb_file_type.currentText() != self._cb_selection_text
 		else:
 			enable = False

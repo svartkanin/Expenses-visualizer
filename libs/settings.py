@@ -1,13 +1,14 @@
 import csv
 import os
+from xlrd import open_workbook  # pandas uses xlrd internally as well so just stick to this module for the preview data
 
 
 class Settings:
 
 	def __init__(self):
 		self.category_def_dir = 'category_definitions.json'
-		self.available_extensions = ['csv']
-		self.available_date_formats = ['%Y-%m-%d', '%d-%m-%Y', '%m-%d-%Y', '%Y-%d-%m']
+		self.available_extensions = ['csv', 'xls']
+		self.available_date_formats = ['%Y-%m-%d', '%y-%m-%d', '%d-%m-%Y', '%m-%d-%Y', '%Y-%d-%m']
 		self.header = []
 		self.col_numbers = None
 		self.has_header = False
@@ -102,8 +103,8 @@ class Settings:
 
 			if file_type == 'csv':
 				with open(test_file, 'r') as fp:
-					sniffer = csv.Sniffer()
 					data = fp.readlines()
+					sniffer = csv.Sniffer()
 					dialect = sniffer.sniff(''.join(data))
 					self.delimiter = dialect.delimiter
 
@@ -113,3 +114,10 @@ class Settings:
 
 					self._preview_data = list(csv.reader(data, delimiter=self.delimiter, quotechar=dialect.quotechar))
 					return self._preview_data[:10]
+			elif file_type == 'xls':
+				wb = open_workbook(test_file)
+				sheet = wb.sheets()[0]
+				self._preview_data = [sheet.row_values(i) for i in range(sheet.nrows)]
+				self.has_header = True  # assume that excel files come with a header
+				self.header = self._preview_data[0]
+				return self._preview_data[:10]

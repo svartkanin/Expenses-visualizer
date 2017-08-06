@@ -119,22 +119,22 @@ class DataHandler:
 		except:
 			return []
 
-	def _cb_str_to_float(self, string):
+	def _cb_str_to_float(self, value):
 		"""
 			Callback function for csv read to get the possible float from a string
 		"""
-		try:
-			if '.' in string and ',' in string:
-				pos1 = string.find('.')
-				pos2 = string.find(',')
+		if isinstance(value, type('')):
+			if '.' in value and ',' in value:
+				pos1 = value.find('.')
+				pos2 = value.find(',')
 				if pos1 > pos2:
-					string = string.replace(',', '', 1)
+					value = value.replace(',', '', 1)
 				else:
-					string = string.replace('.', '', 1)
-
-			return atof(string)
-		except:
-			return None
+					value = value.replace('.', '', 1)
+			return atof(value)
+		elif type(value) in [int, float]:
+			return value
+		raise ValueError('Unknown type: ' + type(value).__name__ + ' for value: ' + repr(value))
 
 	def _cb_date_parser(self, x):
 		"""
@@ -160,7 +160,7 @@ class DataHandler:
 
 	def _import_csv(self, import_data):
 		"""
-			Import csv data into pandas dataframe
+			Import csv data
 		"""
 		return pd.read_csv(import_data,
 		                   delimiter=self._settings.delimiter,
@@ -169,6 +169,17 @@ class DataHandler:
 		                   date_parser=self._cb_date_parser,
 		                   converters={self._settings.column_amount: self._cb_str_to_float,
 		                               self._settings.column_balance: self._cb_str_to_float})
+
+	def _import_excel(self, file):
+		"""
+			Import excel data
+		"""
+		return pd.read_excel(file,
+		                     header=0,
+		                     parse_dates=[self._settings.column_date],
+		                     date_parser=self._cb_date_parser,
+		                     converters={self._settings.column_amount: self._cb_str_to_float,
+		                                 self._settings.column_balance: self._cb_str_to_float})
 
 	def _import_files(self):
 		"""
@@ -180,7 +191,11 @@ class DataHandler:
 				if self._settings.file_type == 'csv':
 					import_data = self._prepare_import_file(file)
 					df = self._import_csv(import_data)
-					container = pd.concat([container, df]).reset_index(drop=True)
+				elif self._settings.file_type == 'xls':
+					df = self._import_excel(file)
+				else:
+					raise ValueError('Unknown file type: ' + self._settings.file_type)
+				container = pd.concat([container, df]).reset_index(drop=True)
 			except (ValueError, TypeError) as ve:
 				raise ImportError('Import error occured with file:\n' + file + '\n' + ve.args[0])
 
