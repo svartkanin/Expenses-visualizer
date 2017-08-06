@@ -211,7 +211,7 @@ class DataHandler:
 		"""
 			Retrieve all data sets from dataframe that are not covered by any category
 		"""
-		regex = '|'.join(['%s' % ('|'.join(i)) for i in categories if i])
+		regex = self._create_regex(categories, dimension=2)
 		if regex:
 			return df[~df[self._settings.column_description].str.contains(regex, flags=re.IGNORECASE)]
 		else:
@@ -222,6 +222,21 @@ class DataHandler:
 			Retrieve unique date string year:month
 		"""
 		return str(date[0]) + ":" + self._get_month_name(date[1])
+
+	def _create_regex(self, values, dimension=1):
+		"""
+			Create a regex OR expression from a list of values
+		"""
+		if dimension == 1:
+			return '|'.join(['%s' % re.escape(i) for i in values if i])
+		elif dimension == 2:
+			all = []
+			for value in values:
+				tmp = []
+				for v in value:
+					tmp.append(re.escape(v))
+				all.extend(tmp)
+			return '|'.join(all)
 
 	def _calculate_categories(self):
 		"""
@@ -234,13 +249,13 @@ class DataHandler:
 
 		for date, df in grouped_months:
 			# only interested in expenses
-			df_exp = df[df[self._settings.column_amount] < 0]
+			df_exp = df[df[self._settings.column_amount] < 0].reset_index()
 			category_container = OrderedDict()
 
 			for alias, categories in category_defs.items():
 				if categories:
 					# create an OR regex for all categories of the current alias
-					regex = '|'.join(['%s' % i for i in categories])
+					regex = self._create_regex(categories)
 					# apply regex to the dataframe, filtering all matching datasets for the current alias
 					df_filtered = df_exp[df_exp[self._settings.column_description].str.contains(regex, flags=re.IGNORECASE)]
 					# calculate the sum and abs for all filtered data sets to be displayed
@@ -326,7 +341,7 @@ class DataHandler:
 		col_amount = self._settings.column_amount
 
 		categories = self._definitions_data['categories'][category]
-		regex = '|'.join(['%s' % i for i in categories])
+		regex = self._create_regex(categories)
 
 		# filter all data sets for year and month
 		df_filtered = self._data_container[(self._data_container[col_date].dt.year == year) & (self._data_container[col_date].dt.month == month)]
@@ -394,6 +409,7 @@ class DataHandler:
 		"""
 			Retrieve data to be displayed in the search table
 		"""
+
 		df = self._data_container.sort_values(by=self._settings.column_date, ascending=False).reset_index()
 		df = df[[self._settings.column_date, self._settings.column_description, self._settings.column_amount]].reset_index()
 		df[self._settings.column_date] = df[self._settings.column_date].apply(lambda x: x.strftime(self._settings.date_format))
