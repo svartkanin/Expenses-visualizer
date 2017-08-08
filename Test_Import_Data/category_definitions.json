@@ -1,0 +1,66 @@
+{
+    "settings": {
+        "file_type": "csv",
+        "date_format": "%Y-%m-%d",
+        "columns": {
+            "amount": "3",
+            "balance": "4",
+            "date": "1",
+            "description": "2"
+        }
+    },
+    "categories": {
+        "Car": [
+            "gas"
+        ],
+        "Snack": [
+            "Cafe",
+            "Bistro"
+        ],
+        "Food": [
+            "Sushi",
+            "Subway"
+        ],
+        "Unknown": [
+            "Transaction 170419 Barber",
+            "Transaction 170420 Grocery store",
+            "Transaction 170426 Farmacy",
+            "Transaction 170425 Hospital",
+            "Transaction 170419 Barber",
+            "Transaction 170420 Grocery store",
+            "Transaction 170420 Rent",
+            "Transaction 170426 Farmacy",
+            "Transaction 170426 Supermarket",
+            "Transaction 170422 Train station",
+            "Transaction 170421 Newspaper",
+            "Transaction 170426 Mini Market",
+            "Transaction 170422 Dog shelter",
+            "Transaction 170420 Rent",
+            "Transaction 170422 Dog shelter",
+            "Transaction 170426 Farmacy",
+            "Transaction 170419 Barber",
+            "Transaction 170421 Newspaper",
+            "Transaction 170420 Rent",
+            "Transaction 170426 Mini Market",
+            "Transaction 170422 Dog shelter",
+            "Transaction 170421 Newspaper",
+            "Transaction 170420 Grocery store",
+            "Transaction 170426 Farmacy",
+            "Transaction 170419 Barber",
+            "Transaction 170425 Hospital",
+            "Transaction 170420 Grocery store",
+            "Transaction 170420 Rent",
+            "Transaction 170426 Farmacy",
+            "Transaction 170421 Newspaper",
+            "Transaction 170426 Supermarket",
+            "Transaction 170420 Grocery store",
+            "Transaction 170420 Grocery store",
+            "Transaction 170426 Farmacy",
+            "Transaction 170426 Supermarket",
+            "Transaction 170425 Hospital",
+            "Transaction 170421 Newspaper",
+            "Transaction 170419 Barber",
+            "Transaction 170421 Newspaper"
+        ]
+    }
+}
